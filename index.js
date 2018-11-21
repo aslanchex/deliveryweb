@@ -9,7 +9,7 @@ function logIn() {
     VK.Auth.login(function(response) {
         if (response.status == "connected") {
             // console.log(response.status);
-            $('.autorize').remove();
+            $('.spec').remove();
             setTimeout(() => {
                 getProfileInfo();
             }, 0);

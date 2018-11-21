@@ -1,46 +1,39 @@
-$('autorize').click(getToken);
-$(document).ready(getProfileInfo);
-$(document).ready(loadFriends);
+$('.autorize').click(logIn);
 
-let token = 'cf4ba29864f13c4eebcf00ca8d683774b1dda4051b8abd9c9639519e223c8ef1c369faeae7e7fa2e8ba8c';
+// $(document).ready(getProfileInfo);
+// $(document).ready(loadFriends);
 
-function getToken() {
-    var str = location.href;
-    token = str.substring(45, 130)
-    console.log(token);
-}
+// let token = 'cf4ba29864f13c4eebcf00ca8d683774b1dda4051b8abd9c9639519e223c8ef1c369faeae7e7fa2e8ba8c';
 
-function getUrl(method, params, token) {
-    
-    if (!method) throw new Error("Вы не указали метод!");
-    params = params || {};
-    params['access_token'] = token;
-    return 'https://api.vk.com/method/'+ method + '?' + $.param(params);
-};
-
-function sendRequest(method, params, token, func) {
-    $.ajax({
-        url: getUrl(method, params, token),
-        method: 'GET',
-        dataType: 'JSONP',
-        success: func,
-    });
+function logIn() {
+    VK.Auth.login(function(response) {
+        if (response.status == "connected") {
+            // console.log(response.status);
+            $('.autorize').remove();
+            setTimeout(() => {
+                getProfileInfo();
+            }, 0);
+            setTimeout(() => {
+                loadFriends();
+            }, 0);
+            
+        } else {
+            console.log(404);   
+        }
+    }, 2);
 }
 
 function loadFriends() {
-    sendRequest('friends.get', {count: 5, order: 'random', fields: 'nickname, photo_100', v: 5.90}, token, function (data) {
+    VK.Api.call('friends.get', {count: 5, order: 'random', fields: 'nickname, photo_100', v: 5.90}, function (data) {
         drawFriends(data.response.items);
         // console.log(data.response.items);
-        
     });
 }
 
 function drawFriends(friends) {
     let html = '';
-
     for (let i = 0; i < friends.length; i++) {
         let f = friends[i];
-
         html += '<li>'+
             '<a href="http://vk.com/id'+ f.id + '">'+ 
                 '<img class="friend" src="'+ f.photo_100 +'" />'
@@ -50,12 +43,12 @@ function drawFriends(friends) {
             +'</a>'
             +'</li>';
     }
-
     $('ul').html(html);
+    $('.container').attr('style', '')  
 }
 
 function getProfileInfo() {
-    sendRequest('users.get', {fields: 'photo_50', v: 5.90}, token, function(data) {
+    VK.Api.call('users.get', {fields: 'photo_50', v: 5.90}, function(data) {
         drawProfileInfo(data.response[0]);
         console.log(data.response[0]);
     });
@@ -69,7 +62,6 @@ function drawProfileInfo(userinfo) {
         + '<img class="user" src="'+ u.photo_50 +'"/>'
         +'</a>'
         +'</div>';
-    
-
-    $('.header').html(html) ;   
+    $('.header').html(html);
+    $('.header').attr('style', '')   
 }

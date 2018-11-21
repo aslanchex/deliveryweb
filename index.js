@@ -1,17 +1,26 @@
+$('autorize').click(getToken);
 $(document).ready(getProfileInfo);
 $(document).ready(loadFriends);
 
+let token = 'cf4ba29864f13c4eebcf00ca8d683774b1dda4051b8abd9c9639519e223c8ef1c369faeae7e7fa2e8ba8c';
 
-function getUrl(method, params) {
+function getToken() {
+    var str = location.href;
+    token = str.substring(45, 130)
+    console.log(token);
+}
+
+function getUrl(method, params, token) {
+    
     if (!method) throw new Error("Вы не указали метод!");
     params = params || {};
-    params['access_token'] = 'cf4ba29864f13c4eebcf00ca8d683774b1dda4051b8abd9c9639519e223c8ef1c369faeae7e7fa2e8ba8c';
+    params['access_token'] = token;
     return 'https://api.vk.com/method/'+ method + '?' + $.param(params);
 };
 
-function sendRequest(method, params, func) {
+function sendRequest(method, params, token, func) {
     $.ajax({
-        url: getUrl(method, params),
+        url: getUrl(method, params, token),
         method: 'GET',
         dataType: 'JSONP',
         success: func,
@@ -19,7 +28,7 @@ function sendRequest(method, params, func) {
 }
 
 function loadFriends() {
-    sendRequest('friends.get', {count: 5, order: 'random', fields: 'nickname, photo_100', v: 5.90}, function (data) {
+    sendRequest('friends.get', {count: 5, order: 'random', fields: 'nickname, photo_100', v: 5.90}, token, function (data) {
         drawFriends(data.response.items);
         // console.log(data.response.items);
         
@@ -46,7 +55,7 @@ function drawFriends(friends) {
 }
 
 function getProfileInfo() {
-    sendRequest('users.get', {fields: 'photo_50', v: 5.90}, function(data) {
+    sendRequest('users.get', {fields: 'photo_50', v: 5.90}, token, function(data) {
         drawProfileInfo(data.response[0]);
         console.log(data.response[0]);
     });
